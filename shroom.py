@@ -27,3 +27,16 @@ column_attr = ['cap-shape',
               'population', 
               'habitat'
               ]
+
+
+class shroom:
+    def __init__(self, columnAttr, attributes):
+        i = 0
+        self.traits = {}
+        for a in attribute:
+            self.traits.update({columnAttr[i]: a})
+            i+=1 
+
+            
+
+
