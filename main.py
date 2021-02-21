@@ -117,8 +117,18 @@ def attributeDict(x):
 
 # all_attribute_dictionaries[attributes[0]] = attributeDict(0)
 
-for i in range(1,23):
+#range(1,23)
+for i in range(1,2):
     all_attribute_dictionaries[attributes[i-1]] = attributeDict(i)
 
-print(all_attribute_dictionaries)
 
+
+cap_shape_dist = all_attribute_dictionaries[attributes[0]]
+print(cap_shape_dist)
+
+for key in cap_shape_dist:
+    strKey = str(key)
+    if strKey[0] == 'e':
+        print(strKey[2])
+    else:
+        exit 
