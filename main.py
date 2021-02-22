@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import math
 from DataReader import DataReader
 
 
@@ -29,7 +30,9 @@ attributes = ['cap-shape',
 
 
 def entropy(p_i):
-    return -(p_i)*np.log2(p_i)
+    if p_i == 0:
+        print("zero")
+    return -((p_i)*np.log2(p_i))
 
 
 def calculateColumnEntropy(column_counts):
@@ -99,7 +102,6 @@ first_attr_entropy = calculateColumnEntropy(df[1].value_counts().to_list())
 all_attribute_dictionaries = {}
 
 
-
 def attributeDict(x):
     attr_dict = {}
     for i in range (6000):
@@ -117,18 +119,71 @@ def attributeDict(x):
 
 # all_attribute_dictionaries[attributes[0]] = attributeDict(0)
 
+
+# takes in attribute count distribution and returns the sum of all entropies 
+def calculateAttrEntropy(dist):
+    attr_count = {}
+    each_entropy = []
+    for key in dist:
+        strKey = str(key)
+        totalAttrCount = 0
+
+        attr_name = strKey[2]
+        
+        if "p_"+attr_name in dist:
+            poisonous_count = dist["p_"+attr_name]
+            if "e_"+attr_name in dist:
+                edible_count = dist["e_"+attr_name]
+                totalAttrCount = edible_count + poisonous_count
+                p_edible = edible_count/totalAttrCount 
+                p_poisonous  = poisonous_count/totalAttrCount
+                attr_count[attr_name] = totalAttrCount
+
+                e = totalAttrCount/6000*(entropy(p_edible) + entropy(p_poisonous))
+
+            else:
+                #attribute implies poisonous
+                p_edible = 0
+                p_poisonous  = 1
+                totalAttrCount = poisonous_count
+                attr_count[attr_name] = totalAttrCount
+
+                e = 0
+        elif "e_"+attr_name in dist:
+            edible_count = dist["e_"+attr_name]
+            if "p_"+attr_name in dist:
+                poisonous_count = dist["p_"+attr_name]
+                totalAttrCount = edible_count + poisonous_count
+                p_edible = edible_count/totalAttrCount 
+                p_poisonous  = poisonous_count/totalAttrCount
+                attr_count[attr_name] = totalAttrCount
+
+                e = totalAttrCount/6000*(entropy(p_edible) + entropy(p_poisonous))
+            else:
+                #attribute always implies edible
+                p_edible = 1
+                p_poisonous  = 0
+                totalAttrCount = edible_count
+                attr_count[attr_name] = totalAttrCount
+
+                e = 0      
+    
+        
+        
+        if e not in each_entropy:
+            each_entropy.append(e)
+
+    attribute_entropy = sum(each_entropy)
+    return attribute_entropy
+
+# this map will hold key value pairs of attribute to their total entropy
+entropies = {}
+
 #range(1,23)
-for i in range(1,2):
+for i in range(1,23):
     all_attribute_dictionaries[attributes[i-1]] = attributeDict(i)
+    attr_entropy = calculateAttrEntropy(all_attribute_dictionaries[attributes[i-1]])
+    entropies[attributes[i-1]] = attr_entropy
 
-
-
-cap_shape_dist = all_attribute_dictionaries[attributes[0]]
-print(cap_shape_dist)
-
-for key in cap_shape_dist:
-    strKey = str(key)
-    if strKey[0] == 'e':
-        print(strKey[2])
-    else:
-        exit 
+        
+print(entropies)
