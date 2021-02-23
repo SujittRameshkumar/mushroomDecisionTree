@@ -178,12 +178,14 @@ def calculateAttrEntropy(dist):
 
 # this map will hold key value pairs of attribute to their total entropy
 entropies = {}
-
-#range(1,23)
-for i in range(1,23):
-    all_attribute_dictionaries[attributes[i-1]] = attributeDict(i)
-    attr_entropy = calculateAttrEntropy(all_attribute_dictionaries[attributes[i-1]])
-    entropies[attributes[i-1]] = attr_entropy
+gain = {}
+# this loop iterates through each attribute column and computes the total entropies which will be used to calculate gain
+for attr in attributes:
+    i = 1
+    all_attribute_dictionaries[attr] = attributeDict(i)
+    i += 1
+    attr_entropy = calculateAttrEntropy(all_attribute_dictionaries[attr])
+    entropies[attr] = attr_entropy
 
         
 print(entropies)
