@@ -4,6 +4,13 @@ import math
 from DataReader import DataReader
 
 
+class Node:
+    def __init__(self, name):
+        self.name = name
+        self.children = []
+    def add_child(self, newNode):
+        self.children.append(newNode)
+
 attributes = ['cap-shape',
               'cap-surface',
               'cap-color', 
@@ -180,12 +187,50 @@ def calculateAttrEntropy(dist):
 entropies = {}
 gain = {}
 # this loop iterates through each attribute column and computes the total entropies which will be used to calculate gain
-for attr in attributes:
-    i = 1
-    all_attribute_dictionaries[attr] = attributeDict(i)
-    i += 1
-    attr_entropy = calculateAttrEntropy(all_attribute_dictionaries[attr])
-    entropies[attr] = attr_entropy
+for i in range(1,23):
+    all_attribute_dictionaries[attributes[i-1]] = attributeDict(i)
 
-        
-print(entropies)
+    attr_entropy = calculateAttrEntropy(all_attribute_dictionaries[attributes[i-1]])
+    entropies[attributes[i-1]] = attr_entropy
+    gain[attributes[i-1]] = pc_entropy - attr_entropy
+
+
+#get highest gain value and assign it to the root of tree
+tree = Node(max(gain, key = gain.get))
+
+
+# uses decision tree algorithm given the attribute set and root node
+def ID3 (all_attribute_dictionaries, gain, tree): 
+    print("Current Root: " + tree.name)
+    if tree.name != "Edible" and tree.name != "Not Edible":
+        #iterate through each attribute (child) of root
+        for key in all_attribute_dictionaries[tree.name]:
+            strKey = str(key)
+            attr_name = strKey[2]
+            edibleName = "e_"+attr_name
+            poisonousName = "p_"+attr_name
+
+            if edibleName in all_attribute_dictionaries[tree.name] and poisonousName in all_attribute_dictionaries[tree.name]:
+                # recursive call for that child
+                del gain[tree.name]
+                newNode = Node(max(gain, key = gain.get))
+                tree.add_child(newNode)
+                ID3(all_attribute_dictionaries, gain, tree.children[-1])
+            elif edibleName in all_attribute_dictionaries[tree.name] and poisonousName not in all_attribute_dictionaries[tree.name]:
+                # leaf node reached
+                newNode = Node(attr_name)
+                newNode.add_child("Edible")
+                tree.add_child(newNode)
+                ID3(all_attribute_dictionaries, gain, tree.children[-1])
+            elif edibleName not in all_attribute_dictionaries[tree.name] and poisonousName in all_attribute_dictionaries[tree.name]:
+                # leaf node reached
+                newNode = Node(attr_name)
+                newNode.add_child("Not Edible")
+                tree.add_child(newNode)
+                ID3(all_attribute_dictionaries, gain, tree.children[-1])
+    
+
+
+#Function below does not work. 
+# ID3(all_attribute_dictionaries,gain, tree)
+
